@@ -34,7 +34,6 @@ public class HelloApplication extends Application {
     static Dir lastDirection = Dir.up;
     static boolean gameOver = false;
     static Random rand = new Random();
-    static int kubut = 12;
 
     @Override
     public void start(Stage stage) throws IOException {
@@ -104,9 +103,9 @@ public class HelloApplication extends Application {
             gc.setFill(Color.RED);
             gc.setFont(new Font("",46));
             gc.fillText("Gatyesz",trueWidth/2-100,trueHeight/2);
-
             return;
         }
+        //movement
         for(int i=snake.size()-1;i>=1;i--){
             snake.get(i).x = snake.get(i-1).x;
             snake.get(i).y = snake.get(i-1).y;
@@ -161,21 +160,24 @@ public class HelloApplication extends Application {
                         gameOver = true;
             }
         }
+        //eat food
         if(foodX == snake.get(0).x && foodY == snake.get(0).y){
             snake.add(new Square(-1,-1));
             newFood();
         }
+        //self destroy
         for(int i=1;i<snake.size();i++){
             if(snake.get(0).x == snake.get(i).x && snake.get(0).y == snake.get(i).y)
                 gameOver = true;
         }
-
+        //color
+        //background
         gc.setFill(Color.BLACK);
         gc.fillRect(0,0,trueWidth, trueHeight);
-
+        //food
         gc.setFill(foodColor);
         gc.fillRoundRect(foodX*square,foodY*square,square,square,20,20);
-
+        //snake
         for(Square s: snake){
             gc.setFill(Color.WHITE);
             gc.fillRect(s.x*square,s.y*square,square,square);
