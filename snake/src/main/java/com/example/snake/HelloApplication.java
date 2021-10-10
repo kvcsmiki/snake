@@ -34,7 +34,7 @@ public class HelloApplication extends Application {
     static Dir lastDirection = Dir.up;
     static boolean gameOver = false;
     static Random rand = new Random();
-
+    static int kubut = 0;
 
     @Override
     public void start(Stage stage) throws IOException {
