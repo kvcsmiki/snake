@@ -1,5 +1,4 @@
 package com.example.snake;
-
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -10,10 +9,8 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Random;
@@ -32,18 +29,20 @@ public class HelloApplication extends Application {
     static ArrayList<Square> snake = new ArrayList<>();
     static Dir direction = Dir.up;
     static Dir lastDirection = Dir.up;
-    static boolean gameOver = false;
+    static boolean gameOver = true;
     static Random rand = new Random();
 
     @Override
     public void start(Stage stage) throws IOException {
 
-        newFood();
+
         VBox root = new VBox();
         Canvas c = new Canvas(trueWidth,trueHeight);
         GraphicsContext gc = c.getGraphicsContext2D();
         root.getChildren().add(c);
-        new AnimationTimer(){
+        startingGui(gc);
+
+        AnimationTimer timer = new AnimationTimer(){
             long lastTick = 0;
             public void handle(long now){
                 if(lastTick == 0){
@@ -56,7 +55,7 @@ public class HelloApplication extends Application {
                     tick(gc);
                 }
             }
-        }.start();
+        };
 
         FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("hello-view.fxml"));
         Scene scene = new Scene(root, trueWidth, trueHeight);
@@ -71,12 +70,13 @@ public class HelloApplication extends Application {
                 direction = Dir.down;
             if(keyEvent.getCode() == KeyCode.D || keyEvent.getCode() == KeyCode.RIGHT)
                 direction = Dir.right;
+            if(keyEvent.getCode() == KeyCode.ENTER && gameOver){
+                gameOver = false;
+                setStart(gc);
+                timer.start();
+                }
             }
         );
-
-
-        snake.add(new Square(width/2,height/2));
-
         stage.setTitle("Snake jatek :D");
         stage.setScene(scene);
         stage.show();
@@ -85,7 +85,24 @@ public class HelloApplication extends Application {
     public static void main(String[] args) {
         launch();
     }
-
+    public static void startingGui(GraphicsContext gc){
+        gc.setFill(Color.BLACK);
+        gc.fillRect(0,0,trueWidth,trueHeight);
+        gc.setFill(Color.WHITE);
+        gc.setFont(new Font("",80));
+        gc.fillText("SNAKE GAME ",7,trueHeight/2-30);
+        gc.setFont(new Font("",46));
+        gc.fillText("Press Enter to play!", 60, trueHeight/2+30);
+    }
+    public static void gameOverGui(GraphicsContext gc){
+        gc.setFill(Color.BLACK);
+        gc.fillRoundRect(foodX*square,foodY*square,square,square,20,20);
+        gc.setFill(Color.RED);
+        gc.setFont(new Font("",60));
+        gc.fillText("GAME OVER",80,trueHeight/2-30);
+        gc.setFont(new Font("",46));
+        gc.fillText("Press Enter to retry",60,trueHeight/2+30);
+    }
     public static void newFood(){
         go: while(true){
             foodX = rand.nextInt(width);
@@ -97,12 +114,23 @@ public class HelloApplication extends Application {
             break;
         }
     }
+    public static void setStart(GraphicsContext gc){
+        snake.removeAll(snake);
+        newFood();
+        snake.add(new Square(width/2,height/2));
+        gc.setFill(Color.BLACK);
+        gc.fillRect(0,0,trueWidth, trueHeight);
+        gc.setFill(foodColor);
+        gc.fillRoundRect(foodX*square,foodY*square,square,square,20,20);
+        for(Square s: snake) {
+            gc.setFill(Color.WHITE);
+            gc.fillRect(s.x * square, s.y * square, square, square);
+        }
+
+    }
     public static void tick(GraphicsContext gc){
         if(gameOver){
-            //TODO NEW SCENE
-            gc.setFill(Color.RED);
-            gc.setFont(new Font("",46));
-            gc.fillText("Gatyesz",trueWidth/2-100,trueHeight/2);
+            gameOverGui(gc);
             return;
         }
         //movement
@@ -114,7 +142,7 @@ public class HelloApplication extends Application {
             case up ->{
                 if(lastDirection == Dir.down){
                     snake.get(0).y++;
-                    if(snake.get(0).y >= height)
+                    if(snake.get(0).y > height-1)
                         gameOver = true;
                     break;
                 }
@@ -132,13 +160,13 @@ public class HelloApplication extends Application {
                 }
                 lastDirection = Dir.down;
                     snake.get(0).y++;
-                    if (snake.get(0).y >= height)
+                    if (snake.get(0).y > height-1)
                         gameOver = true;
             }
             case left-> {
                 if(lastDirection == Dir.right){
                     snake.get(0).x++;
-                    if(snake.get(0).x >= width)
+                    if(snake.get(0).x > width-1)
                         gameOver = true;
                     break;
                 }
@@ -156,7 +184,7 @@ public class HelloApplication extends Application {
                 }
                 lastDirection = Dir.right;
                     snake.get(0).x++;
-                    if (snake.get(0).x >= width)
+                    if (snake.get(0).x > width-1)
                         gameOver = true;
             }
         }
