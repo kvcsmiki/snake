@@ -75,6 +75,8 @@ public class HelloApplication extends Application {
                 setStart(gc);
                 timer.start();
                 }
+            if(keyEvent.getCode() == KeyCode.ESCAPE)
+                System.exit(0);
             }
         );
         stage.setTitle("Snake jatek :D");
