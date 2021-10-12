@@ -1,7 +1,6 @@
 package com.example.snake;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
-import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -11,7 +10,6 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -26,14 +24,16 @@ public class HelloApplication extends Application {
     static int square = 25;
     static int trueWidth = width * square;
     static int trueHeight = height * square;
+    static int center = trueHeight/2;
     static ArrayList<Square> snake = new ArrayList<>();
     static Dir direction = Dir.up;
     static Dir lastDirection = Dir.up;
     static boolean gameOver = true;
+    static boolean victory = false;
     static Random rand = new Random();
 
     @Override
-    public void start(Stage stage) throws IOException {
+    public void start(Stage stage){
 
 
         VBox root = new VBox();
@@ -56,8 +56,6 @@ public class HelloApplication extends Application {
                 }
             }
         };
-
-        FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("hello-view.fxml"));
         Scene scene = new Scene(root, trueWidth, trueHeight);
 
         scene.addEventFilter(KeyEvent.KEY_PRESSED, keyEvent->{
@@ -70,7 +68,8 @@ public class HelloApplication extends Application {
                 direction = Dir.down;
             if(keyEvent.getCode() == KeyCode.D || keyEvent.getCode() == KeyCode.RIGHT)
                 direction = Dir.right;
-            if(keyEvent.getCode() == KeyCode.ENTER && gameOver){
+            if(keyEvent.getCode() == KeyCode.ENTER && (gameOver || victory)){
+                victory = false;
                 gameOver = false;
                 setStart(gc);
                 timer.start();
@@ -92,18 +91,27 @@ public class HelloApplication extends Application {
         gc.fillRect(0,0,trueWidth,trueHeight);
         gc.setFill(Color.WHITE);
         gc.setFont(new Font("",80));
-        gc.fillText("SNAKE GAME ",7,trueHeight/2-30);
+        gc.fillText("SNAKE GAME ",7,center-30);
         gc.setFont(new Font("",46));
-        gc.fillText("Press Enter to play!", 60, trueHeight/2+30);
+        gc.fillText("Press Enter to play!", 60, center+30);
     }
     public static void gameOverGui(GraphicsContext gc){
         gc.setFill(Color.BLACK);
         gc.fillRoundRect(foodX*square,foodY*square,square,square,20,20);
         gc.setFill(Color.RED);
         gc.setFont(new Font("",60));
-        gc.fillText("GAME OVER",80,trueHeight/2-30);
+        gc.fillText("GAME OVER",80,center-30);
         gc.setFont(new Font("",46));
-        gc.fillText("Press Enter to retry",60,trueHeight/2+30);
+        gc.fillText("Press Enter to retry",60,center+30);
+    }
+    public static void victoryGui(GraphicsContext gc){
+        gc.setFill(Color.BLACK);
+        gc.fillRect(0,0,trueWidth,trueHeight);
+        gc.setFill(Color.GREEN);
+        gc.setFont(new Font("",60));
+        gc.fillText("YOU WIN",80,center-30);
+        gc.setFont(new Font("",46));
+        gc.fillText("Press Enter to retry",60,center+30);
     }
     public static void newFood(){
         go: while(true){
@@ -131,11 +139,16 @@ public class HelloApplication extends Application {
 
     }
     public static void tick(GraphicsContext gc){
+        if(victory){
+            victoryGui(gc);
+            return;
+        }
         if(gameOver){
             gameOverGui(gc);
             return;
         }
         //movement
+        Square ujpoz = new Square (snake.get(snake.size()-1).x,snake.get(snake.size()-1).y);
         for(int i=snake.size()-1;i>=1;i--){
             snake.get(i).x = snake.get(i-1).x;
             snake.get(i).y = snake.get(i-1).y;
@@ -192,13 +205,19 @@ public class HelloApplication extends Application {
         }
         //eat food
         if(foodX == snake.get(0).x && foodY == snake.get(0).y){
-            snake.add(new Square(-1,-1));
+            snake.add(ujpoz);
+            if(snake.size() == width*height){
+                victory = true;
+                return;
+            }
             newFood();
         }
         //self destroy
         for(int i=1;i<snake.size();i++){
-            if(snake.get(0).x == snake.get(i).x && snake.get(0).y == snake.get(i).y)
+            if(snake.get(0).x == snake.get(i).x && snake.get(0).y == snake.get(i).y){
                 gameOver = true;
+                break;
+            }
         }
         //color
         //background
@@ -208,10 +227,15 @@ public class HelloApplication extends Application {
         gc.setFill(foodColor);
         gc.fillRoundRect(foodX*square,foodY*square,square,square,20,20);
         //snake
-        for(Square s: snake){
-            gc.setFill(Color.WHITE);
-            gc.fillRect(s.x*square,s.y*square,square,square);
+        for(int i=0;i<snake.size();i++){
+            if(i == 0){
+                gc.setFill(Color.GREEN);
+            }
+            else
+                gc.setFill(Color.WHITE);
+            gc.fillRect(snake.get(i).x*square,snake.get(i).y*square,square,square);
         }
+
 
     }
 }
