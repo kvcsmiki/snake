@@ -4,6 +4,7 @@ import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.VBox;
@@ -31,6 +32,7 @@ public class HelloApplication extends Application {
     static boolean gameOver = true;
     static boolean victory = false;
     static Random rand = new Random();
+    static int score = 0;
 
     @Override
     public void start(Stage stage){
@@ -69,6 +71,7 @@ public class HelloApplication extends Application {
             if(keyEvent.getCode() == KeyCode.D || keyEvent.getCode() == KeyCode.RIGHT)
                 direction = Dir.right;
             if(keyEvent.getCode() == KeyCode.ENTER && (gameOver || victory)){
+                score = 0;
                 victory = false;
                 gameOver = false;
                 setStart(gc);
@@ -206,6 +209,7 @@ public class HelloApplication extends Application {
         //eat food
         if(foodX == snake.get(0).x && foodY == snake.get(0).y){
             snake.add(ujpoz);
+            score++;
             if(snake.size() == width*height){
                 victory = true;
                 return;
