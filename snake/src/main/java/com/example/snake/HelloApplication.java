@@ -4,12 +4,18 @@ import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
+
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -33,9 +39,26 @@ public class HelloApplication extends Application {
     static Random rand = new Random();
     static int score = 0;
     static int highscore = 0;
+    static InputStream head;
+
+    static {
+        try {
+            head = new FileInputStream("C:\\img\\fej.png");
+        } catch (FileNotFoundException e) {
+        }
+    }
+    static InputStream ujra;
+    static {
+        try {
+            ujra = new FileInputStream("C:\\img\\retry.png");
+        } catch (FileNotFoundException e) {
+        }
+    }
+    static Image retry = new Image(ujra);
+    static Image fej = new Image(head);
 
     @Override
-    public void start(Stage stage){
+    public void start(Stage stage) throws IOException {
 
 
         VBox root = new VBox();
@@ -101,7 +124,7 @@ public class HelloApplication extends Application {
         gc.setFont(new Font("",24));
         gc.fillText("Highscore: "+highscore+"",(width-6)*square,2*square);
     }
-    public static void startingGui(GraphicsContext gc){
+    public void startingGui(GraphicsContext gc){
         gc.setFill(Color.BLACK);
         gc.fillRect(0,0,trueWidth,trueHeight);
         gc.setFill(Color.WHITE);
@@ -117,7 +140,8 @@ public class HelloApplication extends Application {
         gc.setFont(new Font("",60));
         gc.fillText("GAME OVER",80,center-30);
         gc.setFont(new Font("",46));
-        gc.fillText("Press Enter to retry",60,center+30);
+        gc.fillText("Press Enter to",110,center+30);
+        gc.drawImage(retry,75,center+40);
     }
     public static void victoryGui(GraphicsContext gc){
         gc.setFill(Color.BLACK);
@@ -141,7 +165,8 @@ public class HelloApplication extends Application {
     }
     public static void setStart(GraphicsContext gc){
         snake.removeAll(snake);
-        newFood();
+        foodX = 3;
+        foodY = 4;
         snake.add(new Square(width/2,height/2));
         gc.setFill(Color.BLACK);
         gc.fillRect(0,0,trueWidth, trueHeight);
@@ -247,7 +272,6 @@ public class HelloApplication extends Application {
         if(foodX == snake.get(0).x && foodY == snake.get(0).y){
             snake.add(ujpoz);
             score++;
-            System.out.println(score);
             if(snake.size() == width*height){
                 victory = true;
                 return;
@@ -274,11 +298,13 @@ public class HelloApplication extends Application {
         //snake
         for(int i=0;i<snake.size();i++){
             if(i == 0){
-                gc.setFill(Color.GREEN);
+                gc.drawImage(fej,snake.get(i).x*square,snake.get(i).y*square);
+
             }
-            else
-                gc.setFill(Color.WHITE);
-            gc.fillRect(snake.get(i).x*square,snake.get(i).y*square,square,square);
+            else {
+                gc.setFill(Color.LIGHTGREEN);
+                gc.fillRect(snake.get(i).x * square, snake.get(i).y * square, square, square);
+            }
         }
 
 
