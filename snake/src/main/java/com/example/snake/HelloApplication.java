@@ -17,7 +17,7 @@ public class HelloApplication extends Application {
 
     static int speed = 10;
     static int width = 20;
-    static int height = 20;
+    static int height = 23;
     static int foodX = 0;
     static int foodY = 0;
     static Color foodColor = Color.RED;
@@ -32,6 +32,7 @@ public class HelloApplication extends Application {
     static boolean victory = false;
     static Random rand = new Random();
     static int score = 0;
+    static int highscore = 0;
 
     @Override
     public void start(Stage stage){
@@ -87,6 +88,19 @@ public class HelloApplication extends Application {
     public static void main(String[] args) {
         launch();
     }
+    public static void scoreBoardDraw(GraphicsContext gc){
+        //scoreboard
+        gc.setFill(Color.LIGHTGREY);
+        gc.fillRect(0,0,trueWidth,3*square);
+        //score
+        gc.setFill(Color.BLACK);
+        gc.setFont(new Font("",24));
+        gc.fillText("Score: "+score+"",0,2*square);
+        //highscore
+        gc.setFill(Color.BLACK);
+        gc.setFont(new Font("",24));
+        gc.fillText("Highscore: "+highscore+"",(width-6)*square,2*square);
+    }
     public static void startingGui(GraphicsContext gc){
         gc.setFill(Color.BLACK);
         gc.fillRect(0,0,trueWidth,trueHeight);
@@ -133,6 +147,7 @@ public class HelloApplication extends Application {
         gc.fillRect(0,0,trueWidth, trueHeight);
         gc.setFill(foodColor);
         gc.fillRoundRect(foodX*square,foodY*square,square,square,20,20);
+        scoreBoardDraw(gc);
         for(Square s: snake) {
             gc.setFill(Color.WHITE);
             gc.fillRect(s.x * square, s.y * square, square, square);
@@ -141,10 +156,18 @@ public class HelloApplication extends Application {
     }
     public static void tick(GraphicsContext gc){
         if(victory){
+            if(highscore < score){
+                highscore = score;
+                scoreBoardDraw(gc);
+            }
             victoryGui(gc);
             return;
         }
         if(gameOver){
+            if(highscore < score){
+                highscore = score;
+                scoreBoardDraw(gc);
+            }
             gameOverGui(gc);
             return;
         }
@@ -239,13 +262,12 @@ public class HelloApplication extends Application {
             }
         }
         //color
-        //scoreboard
 
-        gc.setFill(Color.LIGHTGREY);
-        gc.fillRect(0,0,trueWidth,3*square);
         //background
         gc.setFill(Color.BLACK);
         gc.fillRect(0,3*square,trueWidth, trueHeight);
+        //scoreboard
+        scoreBoardDraw(gc);
         //food
         gc.setFill(foodColor);
         gc.fillRoundRect(foodX*square,foodY*square,square,square,20,20);
