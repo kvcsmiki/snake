@@ -4,7 +4,6 @@ import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.VBox;
@@ -61,7 +60,6 @@ public class HelloApplication extends Application {
         Scene scene = new Scene(root, trueWidth, trueHeight);
 
         scene.addEventFilter(KeyEvent.KEY_PRESSED, keyEvent->{
-            System.out.println(keyEvent.getCode());
             if(keyEvent.getCode() == KeyCode.W || keyEvent.getCode() == KeyCode.UP)
                 direction = Dir.up;
             if(keyEvent.getCode() == KeyCode.A || keyEvent.getCode() == KeyCode.LEFT)
@@ -119,7 +117,7 @@ public class HelloApplication extends Application {
     public static void newFood(){
         go: while(true){
             foodX = rand.nextInt(width);
-            foodY = rand.nextInt(height);
+            foodY = (int)(Math.random()*(height-1-2)+3);
             for(Square c : snake){
                 if(c.x == foodX && c.y == foodY)
                     continue go;
@@ -160,56 +158,73 @@ public class HelloApplication extends Application {
             case up ->{
                 if(lastDirection == Dir.down){
                     snake.get(0).y++;
-                    if(snake.get(0).y > height-1)
+                    if(snake.get(0).y > height-1){
+                        snake.get(0).y--;
                         gameOver = true;
+                    }
                     break;
                 }
                 lastDirection = Dir.up;
                 snake.get(0).y--;
-                if(snake.get(0).y < 0)
+                if(snake.get(0).y < 3){
+                    snake.get(0).y++;
                     gameOver = true;
+                }
             }
             case down-> {
                 if(lastDirection == Dir.up){
                     snake.get(0).y--;
-                    if(snake.get(0).y < 0)
+                    if(snake.get(0).y < 3){
+                        snake.get(0).y++;
                         gameOver = true;
+                    }
                     break;
                 }
                 lastDirection = Dir.down;
                     snake.get(0).y++;
-                    if (snake.get(0).y > height-1)
+                    if (snake.get(0).y > height-1){
+                        snake.get(0).y--;
                         gameOver = true;
+                    }
             }
             case left-> {
                 if(lastDirection == Dir.right){
                     snake.get(0).x++;
-                    if(snake.get(0).x > width-1)
+                    if(snake.get(0).x > width-1){
+                        snake.get(0).x--;
                         gameOver = true;
+                    }
                     break;
                 }
                 lastDirection = Dir.left;
                     snake.get(0).x--;
-                    if (snake.get(0).x < 0)
+                    if (snake.get(0).x < 0) {
+                        snake.get(0).x++;
                         gameOver = true;
+                    }
             }
             case right-> {
                 if(lastDirection == Dir.left){
                     snake.get(0).x--;
-                    if(snake.get(0).x < 0)
+                    if(snake.get(0).x < 0) {
+                        snake.get(0).x++;
                         gameOver = true;
+                    }
                     break;
                 }
                 lastDirection = Dir.right;
                     snake.get(0).x++;
-                    if (snake.get(0).x > width-1)
+                    if (snake.get(0).x > width-1) {
+                        snake.get(0).x--;
                         gameOver = true;
+                    }
             }
         }
         //eat food
         if(foodX == snake.get(0).x && foodY == snake.get(0).y){
             snake.add(ujpoz);
             score++;
+            System.out.println(score);
             if(snake.size() == width*height){
                 victory = true;
                 return;
@@ -224,9 +239,13 @@ public class HelloApplication extends Application {
             }
         }
         //color
+        //scoreboard
+
+        gc.setFill(Color.LIGHTGREY);
+        gc.fillRect(0,0,trueWidth,3*square);
         //background
         gc.setFill(Color.BLACK);
-        gc.fillRect(0,0,trueWidth, trueHeight);
+        gc.fillRect(0,3*square,trueWidth, trueHeight);
         //food
         gc.setFill(foodColor);
         gc.fillRoundRect(foodX*square,foodY*square,square,square,20,20);
