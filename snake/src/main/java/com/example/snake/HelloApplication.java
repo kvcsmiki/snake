@@ -12,10 +12,8 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -38,8 +36,9 @@ public class HelloApplication extends Application {
     static boolean victory = false;
     static Random rand = new Random();
     static int score = 0;
-    static int highscore = 0;
+    static int highscore;
     static InputStream head;
+    static ArrayList<Integer> scores = new ArrayList<>();
 
     static {
         try {
@@ -58,7 +57,7 @@ public class HelloApplication extends Application {
     static Image fej = new Image(head);
 
     @Override
-    public void start(Stage stage) throws IOException {
+    public void start(Stage stage){
 
 
         VBox root = new VBox();
@@ -66,6 +65,8 @@ public class HelloApplication extends Application {
         GraphicsContext gc = c.getGraphicsContext2D();
         root.getChildren().add(c);
         startingGui(gc);
+        feltoltes(scores);
+        getHighscore(scores,gc);
 
         AnimationTimer timer = new AnimationTimer(){
             long lastTick = 0;
@@ -179,20 +180,44 @@ public class HelloApplication extends Application {
         }
 
     }
+    public static void feltoltes(ArrayList<Integer> scores){
+        try {
+            RandomAccessFile be = new RandomAccessFile("score.txt", "r");
+            for(String sor = be.readLine(); sor != null; sor = be.readLine())
+                scores.add(Integer.parseInt(sor));
+            be.close();
+
+        }catch(IOException e){
+            System.out.println("A fájl még nem létezik");
+        }
+    }
+
+    public static void mentes(int score,GraphicsContext gc, ArrayList<Integer> scores){
+        try {
+            RandomAccessFile ki = new RandomAccessFile("score.txt", "rw");
+            for(String sor = ki.readLine(); sor != null ; sor=ki.readLine()){
+            }
+            scores.add(score);
+            ki.writeBytes(score+"\r\n");
+            ki.close();
+            getHighscore(scores,gc);
+
+        }catch(IOException e){
+            System.out.println("Hiba: "+e.getMessage());
+        }
+    }
+    public static void getHighscore(ArrayList<Integer> scores,GraphicsContext gc){
+        for(int elem : scores)
+            if(elem > highscore)
+                highscore = elem;
+        scoreBoardDraw(gc);
+    }
     public static void tick(GraphicsContext gc){
         if(victory){
-            if(highscore < score){
-                highscore = score;
-                scoreBoardDraw(gc);
-            }
             victoryGui(gc);
             return;
         }
         if(gameOver){
-            if(highscore < score){
-                highscore = score;
-                scoreBoardDraw(gc);
-            }
             gameOverGui(gc);
             return;
         }
@@ -209,6 +234,7 @@ public class HelloApplication extends Application {
                     if(snake.get(0).y > height-1){
                         snake.get(0).y--;
                         gameOver = true;
+                        mentes(score,gc,scores);
                     }
                     break;
                 }
@@ -217,6 +243,7 @@ public class HelloApplication extends Application {
                 if(snake.get(0).y < 3){
                     snake.get(0).y++;
                     gameOver = true;
+                    mentes(score,gc,scores);
                 }
             }
             case down-> {
@@ -225,6 +252,7 @@ public class HelloApplication extends Application {
                     if(snake.get(0).y < 3){
                         snake.get(0).y++;
                         gameOver = true;
+                        mentes(score,gc,scores);
                     }
                     break;
                 }
@@ -233,6 +261,7 @@ public class HelloApplication extends Application {
                     if (snake.get(0).y > height-1){
                         snake.get(0).y--;
                         gameOver = true;
+                        mentes(score,gc,scores);
                     }
             }
             case left-> {
@@ -241,6 +270,7 @@ public class HelloApplication extends Application {
                     if(snake.get(0).x > width-1){
                         snake.get(0).x--;
                         gameOver = true;
+                        mentes(score,gc,scores);
                     }
                     break;
                 }
@@ -249,6 +279,7 @@ public class HelloApplication extends Application {
                     if (snake.get(0).x < 0) {
                         snake.get(0).x++;
                         gameOver = true;
+                        mentes(score,gc,scores);
                     }
             }
             case right-> {
@@ -257,6 +288,7 @@ public class HelloApplication extends Application {
                     if(snake.get(0).x < 0) {
                         snake.get(0).x++;
                         gameOver = true;
+                        mentes(score,gc,scores);
                     }
                     break;
                 }
@@ -265,6 +297,7 @@ public class HelloApplication extends Application {
                     if (snake.get(0).x > width-1) {
                         snake.get(0).x--;
                         gameOver = true;
+                        mentes(score,gc,scores);
                     }
             }
         }
@@ -274,21 +307,25 @@ public class HelloApplication extends Application {
             score++;
             if(snake.size() == width*height){
                 victory = true;
+                mentes(score,gc,scores);
                 return;
             }
             newFood();
         }
         //self destroy
-        for(int i=1;i<snake.size();i++){
-            if(snake.get(0).x == snake.get(i).x && snake.get(0).y == snake.get(i).y){
-                gameOver = true;
-                break;
+        if(!gameOver){
+            for (int i = 1; i < snake.size(); i++) {
+                if (snake.get(0).x == snake.get(i).x && snake.get(0).y == snake.get(i).y) {
+                    gameOver = true;
+                    mentes(score, gc, scores);
+                    break;
+                }
             }
         }
         //color
 
         //background
-        gc.setFill(Color.BLACK);
+        gc.setFill(Color.CYAN);
         gc.fillRect(0,3*square,trueWidth, trueHeight);
         //scoreboard
         scoreBoardDraw(gc);
@@ -298,11 +335,11 @@ public class HelloApplication extends Application {
         //snake
         for(int i=0;i<snake.size();i++){
             if(i == 0){
-                gc.drawImage(fej,snake.get(i).x*square,snake.get(i).y*square);
+                gc.drawImage(fej,snake.get(i).x*square,snake.get(i).y*square,square,square);
 
             }
             else {
-                gc.setFill(Color.LIGHTGREEN);
+                gc.setFill(Color.rgb(41,71,107));
                 gc.fillRect(snake.get(i).x * square, snake.get(i).y * square, square, square);
             }
         }
