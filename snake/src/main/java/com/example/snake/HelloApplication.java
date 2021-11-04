@@ -13,9 +13,9 @@ import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
 import java.io.*;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class HelloApplication extends Application {
 
@@ -39,6 +39,7 @@ public class HelloApplication extends Application {
     static int highscore;
     static InputStream head;
     static ArrayList<Integer> scores = new ArrayList<>();
+    static boolean started = true;
 
     static {
         try {
@@ -83,7 +84,6 @@ public class HelloApplication extends Application {
             }
         };
         Scene scene = new Scene(root, trueWidth, trueHeight);
-
         scene.addEventFilter(KeyEvent.KEY_PRESSED, keyEvent->{
             if(keyEvent.getCode() == KeyCode.W || keyEvent.getCode() == KeyCode.UP)
                 direction = Dir.up;
@@ -97,12 +97,26 @@ public class HelloApplication extends Application {
                 score = 0;
                 victory = false;
                 gameOver = false;
+                started = true;
                 setStart(gc);
                 timer.start();
                 }
             if(keyEvent.getCode() == KeyCode.ESCAPE)
                 System.exit(0);
+            if(keyEvent.getCode() == KeyCode.SPACE){
+                if(started){
+                    started = false;
+                    timer.stop();
+
+                }
+                else{
+                    started = true;
+                    timer.start();
+                }
+
             }
+            }
+
         );
         stage.setTitle("Snake jatek :D");
         stage.setScene(scene);
@@ -325,7 +339,7 @@ public class HelloApplication extends Application {
         //color
 
         //background
-        gc.setFill(Color.CYAN);
+        gc.setFill(Color.LIGHTGREEN);
         gc.fillRect(0,3*square,trueWidth, trueHeight);
         //scoreboard
         scoreBoardDraw(gc);
@@ -339,8 +353,10 @@ public class HelloApplication extends Application {
 
             }
             else {
-                gc.setFill(Color.rgb(41,71,107));
+                gc.setFill(Color.BLACK);
                 gc.fillRect(snake.get(i).x * square, snake.get(i).y * square, square, square);
+                gc.setFill(Color.rgb(41,71,107));
+                gc.fillRect(snake.get(i).x * square, snake.get(i).y * square, square-1, square-1);
             }
         }
 
