@@ -11,11 +11,9 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
-
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Random;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class HelloApplication extends Application {
 
@@ -169,7 +167,7 @@ public class HelloApplication extends Application {
     }
     public static void newFood(){
         go: while(true){
-            foodX = rand.nextInt(width);
+            foodX = (int)(Math.random()*width-1+1);
             foodY = (int)(Math.random()*(height-1-2)+3);
             for(Square c : snake){
                 if(c.x == foodX && c.y == foodY)
@@ -180,8 +178,7 @@ public class HelloApplication extends Application {
     }
     public static void setStart(GraphicsContext gc){
         snake.removeAll(snake);
-        foodX = 3;
-        foodY = 4;
+        newFood();
         snake.add(new Square(width/2,height/2));
         gc.setFill(Color.BLACK);
         gc.fillRect(0,0,trueWidth, trueHeight);
@@ -319,7 +316,7 @@ public class HelloApplication extends Application {
         if(foodX == snake.get(0).x && foodY == snake.get(0).y){
             snake.add(ujpoz);
             score++;
-            if(snake.size() == width*height){
+            if(snake.size() == width*height - width*3){
                 victory = true;
                 mentes(score,gc,scores);
                 return;
@@ -344,6 +341,7 @@ public class HelloApplication extends Application {
         //scoreboard
         scoreBoardDraw(gc);
         //food
+        System.out.println(foodX +";"+foodY);
         gc.setFill(foodColor);
         gc.fillRoundRect(foodX*square,foodY*square,square,square,20,20);
         //snake
