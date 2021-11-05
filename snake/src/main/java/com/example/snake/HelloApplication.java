@@ -13,13 +13,19 @@ import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import java.io.*;
 import java.util.ArrayList;
-import java.util.Random;
-
 public class HelloApplication extends Application {
 
     static int speed = 10;
     static int width = 20;
     static int height = 23;
+    static int scoreBoardX = 0;
+    static int scoreBoardY = 0;
+    static int scoreBoardX2 = width;
+    static int scoreBoardY2 = 3;
+    static int gameX = 0;
+    static int gameY = scoreBoardY2;
+    static int gameX2 = width;
+    static int gameY2 = height;
     static int foodX = 0;
     static int foodY = 0;
     static Color foodColor = Color.RED;
@@ -32,12 +38,11 @@ public class HelloApplication extends Application {
     static Dir lastDirection = Dir.up;
     static boolean gameOver = true;
     static boolean victory = false;
-    static Random rand = new Random();
     static int score = 0;
     static int highscore;
     static InputStream head;
     static ArrayList<Integer> scores = new ArrayList<>();
-    static boolean started = true;
+    static boolean runs = true;
 
     static {
         try {
@@ -95,20 +100,20 @@ public class HelloApplication extends Application {
                 score = 0;
                 victory = false;
                 gameOver = false;
-                started = true;
+                runs = true;
                 setStart(gc);
                 timer.start();
                 }
             if(keyEvent.getCode() == KeyCode.ESCAPE)
                 System.exit(0);
             if(keyEvent.getCode() == KeyCode.SPACE){
-                if(started){
-                    started = false;
+                if(runs){
+                    runs = false;
                     timer.stop();
 
                 }
                 else{
-                    started = true;
+                    runs = true;
                     timer.start();
                 }
 
@@ -125,17 +130,20 @@ public class HelloApplication extends Application {
         launch();
     }
     public static void scoreBoardDraw(GraphicsContext gc){
+        int centerY = (scoreBoardY + scoreBoardY2) / 2;
+        if(scoreBoardY2 % 2 != 0)
+            centerY+= 1;
         //scoreboard
         gc.setFill(Color.LIGHTGREY);
-        gc.fillRect(0,0,trueWidth,3*square);
+        gc.fillRect(scoreBoardX*square,scoreBoardY*square,scoreBoardX2*square,scoreBoardY2*square);
         //score
         gc.setFill(Color.BLACK);
         gc.setFont(new Font("",24));
-        gc.fillText("Score: "+score+"",0,2*square);
+        gc.fillText("Score: "+score+"",0,centerY*square);
         //highscore
         gc.setFill(Color.BLACK);
         gc.setFont(new Font("",24));
-        gc.fillText("Highscore: "+highscore+"",(width-6)*square,2*square);
+        gc.fillText("Highscore: "+highscore+"",(scoreBoardX2-6)*square,centerY*square);
     }
     public void startingGui(GraphicsContext gc){
         gc.setFill(Color.BLACK);
@@ -167,8 +175,8 @@ public class HelloApplication extends Application {
     }
     public static void newFood(){
         go: while(true){
-            foodX = (int)(Math.random()*width-1+1);
-            foodY = (int)(Math.random()*(height-1-2)+3);
+            foodX = (int)(Math.random()*gameX2-1+1);
+            foodY = (int)(Math.random()*(gameY2-1-2)+3);
             for(Square c : snake){
                 if(c.x == foodX && c.y == foodY)
                     continue go;
@@ -242,73 +250,73 @@ public class HelloApplication extends Application {
             case up ->{
                 if(lastDirection == Dir.down){
                     snake.get(0).y++;
-                    if(snake.get(0).y > height-1){
-                        snake.get(0).y--;
+                    if(snake.get(0).y > gameY2-1){
                         gameOver = true;
                         mentes(score,gc,scores);
+                        return;
                     }
                     break;
                 }
                 lastDirection = Dir.up;
                 snake.get(0).y--;
-                if(snake.get(0).y < 3){
-                    snake.get(0).y++;
+                if(snake.get(0).y < gameY){
                     gameOver = true;
                     mentes(score,gc,scores);
+                    return;
                 }
             }
             case down-> {
                 if(lastDirection == Dir.up){
                     snake.get(0).y--;
-                    if(snake.get(0).y < 3){
-                        snake.get(0).y++;
+                    if(snake.get(0).y < gameY){
                         gameOver = true;
                         mentes(score,gc,scores);
+                        return;
                     }
                     break;
                 }
                 lastDirection = Dir.down;
                     snake.get(0).y++;
-                    if (snake.get(0).y > height-1){
-                        snake.get(0).y--;
+                    if (snake.get(0).y > gameY2-1){
                         gameOver = true;
                         mentes(score,gc,scores);
+                        return;
                     }
             }
             case left-> {
                 if(lastDirection == Dir.right){
                     snake.get(0).x++;
-                    if(snake.get(0).x > width-1){
-                        snake.get(0).x--;
+                    if(snake.get(0).x > gameX2-1){
                         gameOver = true;
                         mentes(score,gc,scores);
+                        return;
                     }
                     break;
                 }
                 lastDirection = Dir.left;
                     snake.get(0).x--;
-                    if (snake.get(0).x < 0) {
-                        snake.get(0).x++;
+                    if (snake.get(0).x < gameX) {
                         gameOver = true;
                         mentes(score,gc,scores);
+                        return;
                     }
             }
             case right-> {
                 if(lastDirection == Dir.left){
                     snake.get(0).x--;
-                    if(snake.get(0).x < 0) {
-                        snake.get(0).x++;
+                    if(snake.get(0).x < gameX) {
                         gameOver = true;
                         mentes(score,gc,scores);
+                        return;
                     }
                     break;
                 }
                 lastDirection = Dir.right;
                     snake.get(0).x++;
-                    if (snake.get(0).x > width-1) {
-                        snake.get(0).x--;
+                    if (snake.get(0).x > gameX2-1) {
                         gameOver = true;
                         mentes(score,gc,scores);
+                        return;
                     }
             }
         }
@@ -327,9 +335,11 @@ public class HelloApplication extends Application {
         if(!gameOver){
             for (int i = 1; i < snake.size(); i++) {
                 if (snake.get(0).x == snake.get(i).x && snake.get(0).y == snake.get(i).y) {
+                    gc.setFill(Color.RED);
+                    gc.fillRect(snake.get(i).x*square,snake.get(i).y*square,square,square);
                     gameOver = true;
                     mentes(score, gc, scores);
-                    break;
+                    return;
                 }
             }
         }
@@ -337,11 +347,10 @@ public class HelloApplication extends Application {
 
         //background
         gc.setFill(Color.LIGHTGREEN);
-        gc.fillRect(0,3*square,trueWidth, trueHeight);
+        gc.fillRect(gameX*square,gameY*square,gameX2*square, gameY2*square);
         //scoreboard
         scoreBoardDraw(gc);
         //food
-        System.out.println(foodX +";"+foodY);
         gc.setFill(foodColor);
         gc.fillRoundRect(foodX*square,foodY*square,square,square,20,20);
         //snake
