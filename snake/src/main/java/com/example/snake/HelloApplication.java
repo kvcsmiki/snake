@@ -88,14 +88,16 @@ public class HelloApplication extends Application {
         };
         Scene scene = new Scene(root, trueWidth, trueHeight);
         scene.addEventFilter(KeyEvent.KEY_PRESSED, keyEvent->{
-            if(keyEvent.getCode() == KeyCode.W || keyEvent.getCode() == KeyCode.UP)
-                direction = Dir.up;
-            if(keyEvent.getCode() == KeyCode.A || keyEvent.getCode() == KeyCode.LEFT)
-                direction = Dir.left;
-            if(keyEvent.getCode() == KeyCode.S || keyEvent.getCode() == KeyCode.DOWN)
-                direction = Dir.down;
-            if(keyEvent.getCode() == KeyCode.D || keyEvent.getCode() == KeyCode.RIGHT)
-                direction = Dir.right;
+            if(runs){
+                if (keyEvent.getCode() == KeyCode.W || keyEvent.getCode() == KeyCode.UP)
+                    direction = Dir.up;
+                if (keyEvent.getCode() == KeyCode.A || keyEvent.getCode() == KeyCode.LEFT)
+                    direction = Dir.left;
+                if (keyEvent.getCode() == KeyCode.S || keyEvent.getCode() == KeyCode.DOWN)
+                    direction = Dir.down;
+                if (keyEvent.getCode() == KeyCode.D || keyEvent.getCode() == KeyCode.RIGHT)
+                    direction = Dir.right;
+            }
             if(keyEvent.getCode() == KeyCode.ENTER && (gameOver || victory)){
                 score = 0;
                 victory = false;
