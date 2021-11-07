@@ -70,7 +70,6 @@ public class HelloApplication extends Application {
         root.getChildren().add(c);
         startingGui(gc);
         feltoltes(scores);
-        getHighscore(scores,gc);
 
         AnimationTimer timer = new AnimationTimer(){
             long lastTick = 0;
@@ -177,8 +176,8 @@ public class HelloApplication extends Application {
     }
     public static void newFood(){
         go: while(true){
-            foodX = (int)(Math.random()*gameX2-1+1);
-            foodY = (int)(Math.random()*(gameY2-1-2)+3);
+            foodX = (int)(Math.random()*(gameX2-1-gameX+1)+gameX);
+            foodY = (int)(Math.random()*(gameY2-1-gameY+1)+gameY);
             for(Square c : snake){
                 if(c.x == foodX && c.y == foodY)
                     continue go;
@@ -189,7 +188,7 @@ public class HelloApplication extends Application {
     public static void setStart(GraphicsContext gc){
         snake.removeAll(snake);
         newFood();
-        snake.add(new Square(width/2,height/2));
+        snake.add(new Square((gameX+gameX2)/2,(gameY+gameY2)/2));
         gc.setFill(Color.BLACK);
         gc.fillRect(0,0,trueWidth, trueHeight);
         gc.setFill(foodColor);
@@ -199,6 +198,7 @@ public class HelloApplication extends Application {
             gc.setFill(Color.WHITE);
             gc.fillRect(s.x * square, s.y * square, square, square);
         }
+        getHighscore(scores,gc);
 
     }
     public static void feltoltes(ArrayList<Integer> scores){
