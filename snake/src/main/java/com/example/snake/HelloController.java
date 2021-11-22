@@ -1,6 +1,6 @@
 package com.example.snake;
 
-public class HelloController{
+public class HelloController extends App {
 
 }
 
